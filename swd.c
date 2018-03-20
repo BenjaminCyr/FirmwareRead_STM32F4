@@ -11,13 +11,15 @@
 #include "clk.h"
 #include "target.h"
 
-#define MWAIT __asm__ __volatile__( \
+#define MWAIT __asm__ __volatile__ ( \
 		 ".syntax unified 		\n" \
 		 "	movs r0, #0x30 		\n" \
 		 "1: 	subs r0, #1 		\n" \
-		 "	bne 1b 			\n" \
-		 ".syntax divided" : : : 	    \
+		 "	bne 1b 			" : : : \
 		 "cc", "r0")
+		 //"	bne 1b 			\n" \
+		 //".syntax divided" : : : 	    
+		 
 
 #define N_READ_TURN (3u)
 
@@ -47,8 +49,8 @@ static swdStatus_t swdGetRegister( uint8_t const regId, uint32_t * const data );
 
 void swdCtrlInit( void )
 {
-	RCC->AHBENR |= RCC_AHBENR_GPIO_SWDIO;
-	RCC->AHBENR |= RCC_AHBENR_GPIO_SWCLK;
+	RCC->AHB1ENR |= RCC_AHBENR_GPIO_SWDIO;
+	RCC->AHB1ENR |= RCC_AHBENR_GPIO_SWCLK;
 
 	GPIO_SWDIO->MODER |= (0x01u << (PIN_SWDIO << 1u));
 	GPIO_SWCLK->MODER |= (0x01u << (PIN_SWCLK << 1u));
@@ -101,17 +103,17 @@ static void swdDatasend( uint8_t const * data, uint8_t const len )
 
 		if ((cdata & 0x01u) == 0x01u)
 		{
-			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + BSRR_SET));
+			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + GPIO_BSRR_BS0_Pos));
 		}
 		else
 		{
-			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + BSRR_CLEAR));
+			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + GPIO_BSRR_BR0_Pos));
 		}
 		MWAIT;
 
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 		MWAIT;
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 		cdata >>= 1u;
 		MWAIT;
 	}
@@ -134,7 +136,7 @@ static void swdDataIdle( void )
 static void swdDataPP( void )
 {
 	MWAIT;
-	GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + BSRR_CLEAR));
+	GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + GPIO_BSRR_BR0_Pos));
 	GPIO_SWDIO->MODER |= (0x01u << (PIN_SWDIO << 1u));
 	MWAIT;
 
@@ -144,9 +146,9 @@ static void swdDataPP( void )
 
 static void swdTurnaround( void )
 {
-	GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+	GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 	MWAIT;
-	GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+	GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 	MWAIT;
 
 	return ;
@@ -169,9 +171,9 @@ static void swdDataRead( uint8_t * const data, uint8_t const len )
 		cdata |= (GPIO_SWDIO->IDR & (0x01u << (PIN_SWDIO))) ? 0x80u : 0x00u;
 		data[(((len + 7u) >> 3u) - (i >> 3u)) - 1u] = cdata;
 
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 		MWAIT;
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 		MWAIT;
 
 		/* clear buffer after reading 8 bytes */
@@ -229,20 +231,20 @@ static void swdReset( void )
 	/* 50 clk+x */
 	for (i = 0u; i < (50u + 10u); ++i)
 	{
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 		MWAIT;
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 		MWAIT;
 	}
 
 
-	GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + BSRR_CLEAR));
+	GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + GPIO_BSRR_BR0_Pos));
 
 	for (i = 0u; i < 3u; ++i)
 	{
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 		MWAIT;
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 		MWAIT;
 	}
 

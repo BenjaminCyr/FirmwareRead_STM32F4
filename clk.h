@@ -8,7 +8,7 @@
 
 #ifndef INC_CLK_H
 #define INC_CLK_H
-#include "st/stm32f0xx.h"
+#include "stm32f4xx.h"
 
 void clkEnablePLLInt( void );
 void clkEnableSystick( void );;

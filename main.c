@@ -8,12 +8,13 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "st/stm32f0xx.h"
+#include "stm32f4xx.h"
 #include "main.h"
 #include "clk.h"
 #include "swd.h"
 #include "target.h"
 #include "uart.h"
+#include "Include/SystemClockConfig.c"
 
 
 static swdStatus_t extractFlashData( uint32_t const address, uint32_t * const data );
@@ -126,8 +127,9 @@ void printExtractionStatistics( void )
 int main()
 {
 	/* Enable all GPIO clocks */
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOCEN | RCC_AHBENR_GPIODEN | RCC_AHBENR_GPIOEEN | RCC_AHBENR_GPIOFEN;
-	targetSysCtrlInit();
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIODEN | RCC_AHB1ENR_GPIOEEN | RCC_AHB1ENR_GPIOFEN;
+	SystemClock_Config();
+	//targetSysCtrlInit();
 	swdCtrlInit();
 	uartInit();
 
@@ -220,5 +222,5 @@ int main()
 		}
 	}
 
-	return 0u;
+	//return 0u;
 }

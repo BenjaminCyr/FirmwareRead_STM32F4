@@ -24,26 +24,26 @@ static uint32_t volatile *sysTickCVR = SYSTICK_CVR_ADDR;
 /* Choose 48MHz system clock using the PLL */
 void clkEnablePLLInt( void )
 {
-	/* Flash Latency for >=24MHz: One wait state */
-	FLASH->ACR |= FLASH_ACR_LATENCY;
+//	/* Flash Latency for >=24MHz: One wait state */
+//	FLASH->ACR |= FLASH_ACR_LATENCY;
 
-	/* Prediv = 2 */
-	RCC->CFGR2 = RCC_CFGR2_PREDIV1_DIV2;
-	RCC->CFGR |= RCC_CFGR_PLLMUL12 | RCC_CFGR_PLLSRC_HSI_PREDIV;
+//	/* Prediv = 2 */
+//	RCC->CFGR2 = RCC_CFGR2_PREDIV1_DIV2;
+//	RCC->CFGR |= RCC_CFGR_PLLMUL12 | RCC_CFGR_PLLSRC_HSI_PREDIV;
 
-	RCC->CR |= RCC_CR_PLLON;
+//	RCC->CR |= RCC_CR_PLLON;
 
-	while (!(RCC->CR & RCC_CR_PLLRDY))
-	{
-		; /* Wait for clock to become stable */
-	}
+//	while (!(RCC->CR & RCC_CR_PLLRDY))
+//	{
+//		; /* Wait for clock to become stable */
+//	}
 
-	RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_PLL;
+//	RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_PLL;
 
-	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL)
-	{
-		; /* Wait for clock to become selected */
-	}
+//	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL)
+//	{
+//		; /* Wait for clock to become selected */
+//	}
 
 	return ;
 }

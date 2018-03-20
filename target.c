@@ -11,8 +11,8 @@
 
 void targetSysCtrlInit( void )
 {
-	RCC->AHBENR |= RCC_AHBENR_GPIO_RESET;
-	RCC->AHBENR |= RCC_AHBENR_GPIO_POWER;
+	RCC->AHB1ENR |= RCC_AHBENR_GPIO_RESET;
+	RCC->AHB1ENR |= RCC_AHBENR_GPIO_POWER;
 
 	GPIO_RESET->MODER |= (0x01u << (PIN_RESET << 1u));
 	GPIO_POWER->MODER |= (0x01u << (PIN_POWER << 1u));
@@ -28,14 +28,14 @@ void targetSysCtrlInit( void )
 
 void targetSysReset( void )
 {
-	GPIO_RESET->BSRR = (0x01u << (PIN_RESET + BSRR_CLEAR));
+	GPIO_RESET->BSRR = (0x01u << (PIN_RESET + GPIO_BSRR_BR0_Pos));
 
 	return ;
 }
 
 void targetSysUnReset( void )
 {
-	GPIO_RESET->BSRR = (0x01u << (PIN_RESET + BSRR_SET));
+	GPIO_RESET->BSRR = (0x01u << (PIN_RESET + GPIO_BSRR_BS0_Pos));
 
 	return ;
 }
@@ -43,14 +43,14 @@ void targetSysUnReset( void )
 
 void targetSysOff( void )
 {
-	GPIO_POWER->BSRR = (0x01u << (PIN_POWER + BSRR_CLEAR));
+	GPIO_POWER->BSRR = (0x01u << (PIN_POWER + GPIO_BSRR_BR0_Pos));
 
 	return ;
 }
 
 void targetSysOn( void )
 {
-	GPIO_POWER->BSRR = (0x01u << (PIN_POWER + BSRR_SET));
+	GPIO_POWER->BSRR = (0x01u << (PIN_POWER + GPIO_BSRR_BS0_Pos));
 
 	return ;
 }

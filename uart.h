@@ -8,7 +8,7 @@
 
 #ifndef INC_UART_H
 #define INC_UART_H
-#include "st/stm32f0xx.h"
+#include "stm32f4xx.h"
 
 typedef struct {
 	uint32_t transmitHex;

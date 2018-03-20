@@ -10,7 +10,7 @@
 #include "main.h"
 #include "uart.h"
 
-#define UART_WAIT_TRANSMIT do { ; } while (!(USART2->ISR & USART_ISR_TXE));
+#define UART_WAIT_TRANSMIT do { ; } while (!(USART2->SR & USART_SR_TXE));
 #define UART_BUFFER_LEN (12u)
 
 static const char chrTbl[] = "0123456789ABCDEF";
@@ -26,22 +26,22 @@ void uartInit( void )
 	uint8_t volatile uartData = 0u;
 	uartData = uartData; /* suppress GCC warning... */
 
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 
 	/* USART2 configuration */
 	RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 	GPIOA->MODER |= GPIO_MODER_MODER2_1 | GPIO_MODER_MODER3_1;
-	GPIOA->OSPEEDR |= (GPIO_OSPEEDR_OSPEEDR2_0 | GPIO_OSPEEDR_OSPEEDR2_1) | (GPIO_OSPEEDR_OSPEEDR3_0 | GPIO_OSPEEDR_OSPEEDR3_1);
+	GPIOA->OSPEEDR |= (GPIO_OSPEEDER_OSPEEDR2_0 | GPIO_OSPEEDER_OSPEEDR2_1) | (GPIO_OSPEEDER_OSPEEDR3_0 | GPIO_OSPEEDER_OSPEEDR3_1);
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR2_1 | GPIO_PUPDR_PUPDR3_1;
 	GPIOA->AFR[0] = (0x01u << (2u * 4u)) | (0x01u << (3u * 4u));
 	USART2->CR2 = 0u;
-	USART2->BRR = 0x1A1u; /* 115200 Baud at 48 MHz clock */
+	USART2->BRR = 0x5B2u; /* 0x5B2 91.14583 : 115200 Baud at 168 MHz clock */
 	USART2->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE;
 
 	/* Flush UART buffers */
-	uartData = USART2->RDR;
-	uartData = USART2->RDR;
-	uartData = USART2->RDR;
+	uartData = USART2->DR;
+	uartData = USART2->DR;
+	uartData = USART2->DR;
 
 	return ;
 }
@@ -168,9 +168,9 @@ void uartReceiveCommands( uartControl_t * const ctrl )
 {
 	uint8_t uartData = 0u;
 
-	if (USART2->ISR & USART_ISR_RXNE)
+	if (USART2->SR & USART_SR_RXNE)
 	{
-		uartData = USART2->RDR;
+		uartData = USART2->DR;
 
 		switch (uartData)
 		{
@@ -234,7 +234,7 @@ void uartSendWordBinLE( uint32_t const val )
 
 	for (i = 0u; i < 4u; ++i)
 	{
-		USART2->TDR = tval & 0xFFu;
+		USART2->DR = tval & 0xFFu;
 		tval >>= 8u;
 		UART_WAIT_TRANSMIT;
 	}
@@ -250,7 +250,7 @@ void uartSendWordBinBE( uint32_t const val )
 
 	for (i = 0u; i < 4u; ++i)
 	{
-		USART2->TDR = ((tval >> ((3u - i) << 3u)) & 0xFFu);
+		USART2->DR = ((tval >> ((3u - i) << 3u)) & 0xFFu);
 		UART_WAIT_TRANSMIT;
 	}
 
@@ -308,7 +308,7 @@ void uartSendStr( const char * const str )
 
 	while (*strptr)
 	{
-		USART2->TDR = *strptr;
+		USART2->DR = *strptr;
 		++strptr;
 		UART_WAIT_TRANSMIT;
 	}
