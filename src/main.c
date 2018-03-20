@@ -14,7 +14,7 @@
 #include "swd.h"
 #include "target.h"
 #include "uart.h"
-#include "Include/SystemClockConfig.c"
+#include "../inc/SystemClockConfig.c"
 
 
 static swdStatus_t extractFlashData( uint32_t const address, uint32_t * const data );
