@@ -13,6 +13,10 @@ from datetime import datetime
 import subprocess
 import signal
 import time
+<<<<<<< Updated upstream
+=======
+import serial
+>>>>>>> Stashed changes
 
 from prompt_toolkit import prompt
 from prompt_toolkit.contrib.completers import WordCompleter
@@ -81,13 +85,22 @@ def sigalarm_handler(signo, frame):
     global finish
     if finish:
         print()
+<<<<<<< Updated upstream
         print('Programm finished.')
+=======
+        print('Program finished.')
+>>>>>>> Stashed changes
         exit()
 
     print('End of data.')
     print()
     finish = True
+<<<<<<< Updated upstream
     UART('/dev/ttyUSB0').send_cmd('P', True)
+=======
+    #WARNING: Hardcoded
+    UART('/dev/tty.usbserial').send_cmd('P')
+>>>>>>> Stashed changes
 
 
 def decode_ascii(s, outfile):
@@ -130,7 +143,11 @@ def _read_enddata(fd):
     # Print remaining data from uart until timeout is reached.
     while True:
         signal.alarm(1)
+<<<<<<< Updated upstream
         char = fd.read(1)
+=======
+        char = fd.read(1).decode('utf-8')
+>>>>>>> Stashed changes
         signal.alarm(0)
 
         print(char, end='')
@@ -157,7 +174,11 @@ def read_ascii(fd, outfile):
         decoded_line = ''
 
         while c < 32:
+<<<<<<< Updated upstream
             char = fd.read(1)
+=======
+            char = fd.read(1).decode('utf-8')
+>>>>>>> Stashed changes
 
             if char == ' ':
                 continue
@@ -171,7 +192,11 @@ def read_ascii(fd, outfile):
 
             # Reached end of data.
             # Flush all buffers and read special stuff at the end.
+<<<<<<< Updated upstream
             if char == '\r' or char == '\n':
+=======
+            if char == '\n':
+>>>>>>> Stashed changes
                 try:
                     line += '  |' + decode_ascii(lineraw, outfile) + '|'
                 except ValueError:
@@ -196,6 +221,7 @@ class UART:
 
     def __init__(self, devnode):
         self.devnode = devnode
+<<<<<<< Updated upstream
         subprocess.call( [
             'stty',
             '--file={}'.format(self.devnode),
@@ -210,15 +236,38 @@ class UART:
         writefd = open(self.devnode, 'w')
         time.sleep(0.1)
         writefd.write(code + '\n')
+=======
+        self.fd = serial.Serial(port=self.devnode, baudrate=115200)
+
+#        subprocess.call( [
+#            'stty',
+#            '-f', '{}'.format(self.devnode),
+#            '115200',
+#            'raw',
+#            '-echok',
+#            '-echo',
+#        ])
+#
+    def send_cmd(self, code, multiline=False):
+        #time.sleep(0.5)
+        self.fd.write((code + '\n').encode('utf-8'))
+>>>>>>> Stashed changes
 
         while True:
             try:
                 if multiline:
                     signal.alarm(1)
+<<<<<<< Updated upstream
                 char = readfd.read(1)
                 signal.alarm(0)
                 if not multiline:
                     if char == '\r' or char == '\n':
+=======
+                char = self.fd.read(1).decode('utf-8')
+                signal.alarm(0)
+                if not multiline:
+                    if char == '\n':
+>>>>>>> Stashed changes
                         print()
                         break
                 print(char, end='')
@@ -228,12 +277,15 @@ class UART:
                 print('Shutting down...')
                 exit(1)
 
+<<<<<<< Updated upstream
         writefd.close()
         readfd.close()
 
     def open(self, mode):
         return open(self.devnode, mode)
 
+=======
+>>>>>>> Stashed changes
 
 class REPL:
 
@@ -250,6 +302,10 @@ class REPL:
         self.uart = UART(devnode)
 
     def handle_cmd(self, cmd, *args):
+<<<<<<< Updated upstream
+=======
+        print("Handle Command")
+>>>>>>> Stashed changes
         if cmd == 'set':
             self.set_config(args[0], args[1])
         elif cmd == 'run':
@@ -368,6 +424,7 @@ def main():
     else:
         uart.send_cmd('e')
     uart.send_cmd('S')
+<<<<<<< Updated upstream
     fd = uart.open('r')
     print()
 
@@ -377,6 +434,24 @@ def main():
         print('Leaving...')
     finally:
         fd.close()
+=======
+
+    try:
+        #while 1:
+        #    string = ""
+        #    if uart.fd.in_waiting:
+        #        char = uart.fd.read().decode('utf-8')
+        #        if char == "\n":
+        #            print(string)
+        #            string = ""
+        #        else:
+        #            string += char
+        read_ascii(uart.fd, args.outfile)
+    except KeyboardInterrupt:
+        print('Leaving...')
+    finally:
+        uart.fd.close()
+>>>>>>> Stashed changes
 
 
 if __name__ == '__main__':
