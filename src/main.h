@@ -18,12 +18,12 @@
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
-#define GPIO_LED_BLUE (GPIOC)
-#define GPIO_LED_GREEN (GPIOC)
+#define GPIO_LED_BLUE (GPIOD)
+#define GPIO_LED_GREEN (GPIOD)
 #define GPIO_BUTTON (GPIOA)
 
-#define PIN_LED_BLUE (8u)
-#define PIN_LED_GREEN (9u)
+#define PIN_LED_BLUE (12u)
+#define PIN_LED_GREEN (13u)
 #define PIN_BUTTON (0u)
 
 #define MAX_READ_ATTEMPTS (100u)
