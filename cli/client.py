@@ -13,6 +13,7 @@ from datetime import datetime
 import subprocess
 import signal
 import time
+import serial
 
 from prompt_toolkit import prompt
 from prompt_toolkit.contrib.completers import WordCompleter
@@ -81,13 +82,14 @@ def sigalarm_handler(signo, frame):
     global finish
     if finish:
         print()
-        print('Programm finished.')
+        print('Program finished.')
         exit()
 
     print('End of data.')
     print()
     finish = True
-    UART('/dev/ttyUSB0').send_cmd('P', True)
+    #WARNING: Hardcoded
+    UART('/dev/tty.usbserial').send_cmd('P')
 
 
 def decode_ascii(s, outfile):
@@ -130,7 +132,7 @@ def _read_enddata(fd):
     # Print remaining data from uart until timeout is reached.
     while True:
         signal.alarm(1)
-        char = fd.read(1)
+        char = fd.read(1).decode('utf-8')
         signal.alarm(0)
 
         print(char, end='')
@@ -157,7 +159,7 @@ def read_ascii(fd, outfile):
         decoded_line = ''
 
         while c < 32:
-            char = fd.read(1)
+            char = fd.read(1).decode('utf-8')
 
             if char == ' ':
                 continue
@@ -171,7 +173,7 @@ def read_ascii(fd, outfile):
 
             # Reached end of data.
             # Flush all buffers and read special stuff at the end.
-            if char == '\r' or char == '\n':
+            if char == '\n':
                 try:
                     line += '  |' + decode_ascii(lineraw, outfile) + '|'
                 except ValueError:
@@ -196,29 +198,29 @@ class UART:
 
     def __init__(self, devnode):
         self.devnode = devnode
-        subprocess.call( [
-            'stty',
-            '--file={}'.format(self.devnode),
-            '115200',
-            'raw',
-            '-echok',
-            '-echo',
-        ])
+        self.fd = serial.Serial(port=self.devnode, baudrate=115200)
 
+#        subprocess.call( [
+#            'stty',
+#            '-f', '{}'.format(self.devnode),
+#            '115200',
+#            'raw',
+#            '-echok',
+#            '-echo',
+#        ])
+#
     def send_cmd(self, code, multiline=False):
-        readfd = open(self.devnode, 'r')
-        writefd = open(self.devnode, 'w')
-        time.sleep(0.1)
-        writefd.write(code + '\n')
+        #time.sleep(0.5)
+        self.fd.write((code + '\n').encode('utf-8'))
 
         while True:
             try:
                 if multiline:
                     signal.alarm(1)
-                char = readfd.read(1)
+                char = self.fd.read(1).decode('utf-8')
                 signal.alarm(0)
                 if not multiline:
-                    if char == '\r' or char == '\n':
+                    if char == '\n':
                         print()
                         break
                 print(char, end='')
@@ -227,12 +229,6 @@ class UART:
                 print('Is it already running?')
                 print('Shutting down...')
                 exit(1)
-
-        writefd.close()
-        readfd.close()
-
-    def open(self, mode):
-        return open(self.devnode, mode)
 
 
 class REPL:
@@ -250,6 +246,7 @@ class REPL:
         self.uart = UART(devnode)
 
     def handle_cmd(self, cmd, *args):
+        print("Handle Command")
         if cmd == 'set':
             self.set_config(args[0], args[1])
         elif cmd == 'run':
@@ -368,15 +365,22 @@ def main():
     else:
         uart.send_cmd('e')
     uart.send_cmd('S')
-    fd = uart.open('r')
-    print()
 
     try:
-        read_ascii(fd, args.outfile)
+        #while 1:
+        #    string = ""
+        #    if uart.fd.in_waiting:
+        #        char = uart.fd.read().decode('utf-8')
+        #        if char == "\n":
+        #            print(string)
+        #            string = ""
+        #        else:
+        #            string += char
+        read_ascii(uart.fd, args.outfile)
     except KeyboardInterrupt:
         print('Leaving...')
     finally:
-        fd.close()
+        uart.fd.close()
 
 
 if __name__ == '__main__':
