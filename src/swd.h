@@ -12,14 +12,14 @@
 #include "stm32f4xx.h"
 
 
-#define RCC_AHBENR_GPIO_SWDIO (RCC_AHB1ENR_GPIOAEN)
-#define RCC_AHBENR_GPIO_SWCLK (RCC_AHB1ENR_GPIOAEN)
+#define RCC_AHBENR_GPIO_SWDIO (RCC_AHB1ENR_GPIOBEN)
+#define RCC_AHBENR_GPIO_SWCLK (RCC_AHB1ENR_GPIOBEN)
 
-#define GPIO_SWDIO (GPIOA)
-#define PIN_SWDIO (1u)
+#define GPIO_SWDIO (GPIOB)
+#define PIN_SWDIO (11u)
 
-#define GPIO_SWCLK (GPIOA)
-#define PIN_SWCLK (2u)
+#define GPIO_SWCLK (GPIOB)
+#define PIN_SWCLK (12u)
 
 
 /* Internal SWD status. There exist combined SWD status values (e.g. 0x60), since subsequent command replys are OR'ed. Thus there exist cases where the previous command executed correctly (returned 0x20) and the following command failed (returned 0x40), resulting in 0x60. */

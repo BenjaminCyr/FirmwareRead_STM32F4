@@ -11,6 +11,8 @@
 #include "clk.h"
 #include "target.h"
 
+#define DO_JTAG_RESET
+
 #define MWAIT __asm__ __volatile__ ( \
 		 ".syntax unified 		\n" \
 		 "	movs r0, #0x30 		\n" \
@@ -18,7 +20,8 @@
 		 "	bne 1b 			" : : : \
 		 "cc", "r0")
 		 //"	bne 1b 			\n" \
-		 //".syntax divided" : : : 	    
+		 //".syntax divided" : : : 	
+		// "	movs r0, #0x30 		\n" 
 		 
 
 #define N_READ_TURN (3u)
@@ -202,9 +205,9 @@ static void swdReset( void )
 	/* 50 clk+x */
 	for (i=0u; i < (50u + 10u); ++i)
 	{
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 		MWAIT;
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 		MWAIT;
 	}
 
@@ -214,15 +217,15 @@ static void swdReset( void )
 	for (i = 0u; i < 16u; ++i)
 	{
 		if (send1[i])
-			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + BSRR_SET));
+			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + GPIO_BSRR_BS0_Pos));
 		else
-			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + BSRR_CLEAR));
+			GPIO_SWDIO->BSRR = (0x01u << (PIN_SWDIO + GPIO_BSRR_BR0_Pos));
 
 		MWAIT;
 
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_SET));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BS0_Pos));
 		MWAIT;
-		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + BSRR_CLEAR));
+		GPIO_SWCLK->BSRR = (0x01u << (PIN_SWCLK + GPIO_BSRR_BR0_Pos));
 		MWAIT;
 
 	}

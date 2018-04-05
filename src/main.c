@@ -129,7 +129,7 @@ int main()
 	/* Enable all GPIO clocks */
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIODEN | RCC_AHB1ENR_GPIOEEN | RCC_AHB1ENR_GPIOFEN;
 	SystemClock_Config();
-	//targetSysCtrlInit();
+	targetSysCtrlInit();
 	swdCtrlInit();
 	uartInit();
 
